@@ -2,27 +2,27 @@ import numpy as np
 
 class KNNRegressor:
     def __init__(self):
-        self.points = []  # List of points
+        self.data = np.empty((0, 2))  # shape: (N, 2)
 
     def insert_point(self, x, y):
-        self.points.append((x, y))
+        point = np.array([[x, y]])
+        self.data = np.vstack((self.data, point))  # Efficient batch-wise NumPy appending
 
     def compute(self, target_x, k):
-        if k > len(self.points):
-            raise ValueError(f"k = {k} is greater than number of points N = {len(self.points)}")
+        N = self.data.shape[0]
+        if k > N:
+            raise ValueError(f"k = {k} is greater than number of points N = {N}")
 
-        # Convert list of tuples into a numpy array
-        data = np.array(self.points)  # shape: (N, 2)
-        x_vals = data[:, 0]
-        y_vals = data[:, 1]
+        x_vals = self.data[:, 0]
+        y_vals = self.data[:, 1]
 
-        # Compute distances from each x to target_x
+        # Compute distances using vectorized NumPy operations
         distances = np.abs(x_vals - target_x)
 
         # Get indices of k smallest distances
-        nearest_indices = np.argsort(distances)[:k]
+        nearest_indices = np.argpartition(distances, k)[:k]
 
-        # Compute mean y of those k neighbors
+        # Compute mean y
         nearest_y = y_vals[nearest_indices]
         return np.mean(nearest_y)
     
