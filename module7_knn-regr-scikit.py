@@ -2,26 +2,28 @@ import numpy as np
 from sklearn.neighbors import KNeighborsRegressor
 class KNNRegressor:
     def __init__(self):
-        self.data = np.empty((0, 2)) # Empty array of shape 2d (X and Y)
+        self.points = []  # Store as list of tuples (x, y)
 
     def insert_point(self, x, y):
-        point = np.array([[x, y]])
-        self.data = np.vstack((self.data, point)) 
+        self.points.append((x, y))
 
     def get_variance(self):
-        return np.var(self.data[:, 1]) if self.data.shape[0] > 0 else 0.0
-    
-    def compute(self, target_x, k):
-        N = self.data.shape[0]
-        if k > N:
-            raise ValueError(f"k: {k} is greater than number of points N: {N}")
+        if not self.points:
+            return 0.0
+        y_vals = np.array([p[1] for p in self.points])
+        return np.var(y_vals)
 
-        X = self.data[:, 0].reshape(-1, 1)  
-        y = self.data[:, 1]               
+    def compute(self, target_x, k):
+        if k > len(self.points):
+            raise ValueError(f"k: {k} is greater than number of points N: {len(self.points)}")
+
+        data = np.array(self.points)
+        X = data[:, 0].reshape(-1, 1)
+        y = data[:, 1]
 
         model = KNeighborsRegressor(n_neighbors=k)
         model.fit(X, y)
-        y_pred = model.predict(np.array([[target_x]])) 
+        y_pred = model.predict(np.array([[target_x]]))
         return y_pred[0]
     
 knn = KNNRegressor()
